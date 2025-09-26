@@ -7,17 +7,24 @@ Archivo CSV: `sample_players_basket.csv`
 
 ## Funcionamiento:
 
-Paso 1: El programa lee automáticamente el archivo CSV.
-Paso 2: El usuario selecciona el tipo de estadística que quiere ordenar.
+# Paso 1: 
+El programa lee automáticamente el archivo CSV.
+
+# Paso 2: 
+El usuario selecciona el tipo de estadística que quiere ordenar.
    - [0] PTS (puntos)
    - [1] REB (rebotes)
    - [2] AST (asistencias)
    - [3] STL (robos)
    - [4] BLK (bloqueos)
-Paso 3: El usuario elige el orden:
+   - 
+# Paso 3:
+El usuario elige el orden:
    - [1] Ascendente
    - [2] Descendente
-Paso 4: El programa imprime la tabla con `Nombre | Estadística` ya ordenada.
+   - 
+# Paso 4:
+El programa imprime la tabla con `Nombre | Estadística` ya ordenada.
 
 ---
 
