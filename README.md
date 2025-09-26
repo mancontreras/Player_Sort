@@ -1,4 +1,4 @@
-### Player_Sort
+# Player_Sort
 Visor de estadísticas de jugadores de básquet con QuickSort
 Este proyecto carga un archivo tipo tabla (CSV) con nombres de jugadores y sus estadísticas (PTS, REB, AST, STL, BLK). El programa permite elegir una estadística y mostrar a todos los jugadores ordenados de manera ascendente o descendente según ese valor.
 
@@ -7,10 +7,10 @@ Archivo CSV: `sample_players_basket.csv`
 
 ## Funcionamiento:
 
-# Paso 1: 
+## Paso 1: 
 El programa lee automáticamente el archivo CSV.
 
-# Paso 2: 
+## Paso 2: 
 El usuario selecciona el tipo de estadística que quiere ordenar.
    - [0] PTS (puntos)
    - [1] REB (rebotes)
@@ -18,12 +18,12 @@ El usuario selecciona el tipo de estadística que quiere ordenar.
    - [3] STL (robos)
    - [4] BLK (bloqueos)
    - 
-# Paso 3:
+## Paso 3:
 El usuario elige el orden:
    - [1] Ascendente
    - [2] Descendente
    - 
-# Paso 4:
+## Paso 4:
 El programa imprime la tabla con `Nombre | Estadística` ya ordenada.
 
 ---
