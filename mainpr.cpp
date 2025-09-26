@@ -1,3 +1,5 @@
+//Manuel Eduardo Contreras Flores - A01707142 
+
 #include <iostream>   // para imprimir y leer de consola
 #include <iomanip>    // para setw (formato de columnas)
 #include <vector>     // vector, obvio
