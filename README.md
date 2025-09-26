@@ -17,12 +17,12 @@ El usuario selecciona el tipo de estadística que quiere ordenar.
    - [2] AST (asistencias)
    - [3] STL (robos)
    - [4] BLK (bloqueos)
-   - 
+     
 ## Paso 3:
 El usuario elige el orden:
    - [1] Ascendente
    - [2] Descendente
-   - 
+     
 ## Paso 4:
 El programa imprime la tabla con `Nombre | Estadística` ya ordenada.
 
