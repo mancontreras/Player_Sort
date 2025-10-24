@@ -1,5 +1,3 @@
-//Manuel Eduardo Contreras Flores - A01707142 
-
 #pragma once
 #include <string>
 #include <vector>

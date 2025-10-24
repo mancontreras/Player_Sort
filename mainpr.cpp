@@ -1,81 +1,167 @@
-//Manuel Eduardo Contreras Flores - A01707142 
+/*
+Manuel Eduardo Contreras Flores - A01707142
+Proyecto Player_Sort
+*/
 
-#include <iostream>   // para imprimir y leer de consola
-#include <iomanip>    // para setw (formato de columnas)
-#include <vector>     // vector, obvio
-#include <string>     // string
-#include <utility>    // por si acaso (swap, etc.)
-#include <algorithm>  // para std::max()
+/*
+Manuel Eduardo Contreras Flores - A01707142
+Proyecto Player_Sort
+*/
 
-#include "csv.hpp"        // mi loader del CSV (Player y loadPlayers)
-#include "quicksort.hpp"  // mi QuickSort (Lomuto)
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <fstream>
+#include <cctype>
 
-struct Row { std::string name; double val; }; // estructura chiquita solo con lo que voy a mostrar
+#include "csv.hpp"       // carga CSV y struct Player
+#include "quicksort.hpp" // quickSort plantilla Lomuto
 
-// imprime la tabla en consola -> O(n) porque recorre el vector una vez
+// --------------------------------------------------------------
+// Estructura auxiliar para mostrar datos ordenados
+// --------------------------------------------------------------
+struct Row {
+    std::string name;
+    double val;
+};
+
+// --------------------------------------------------------------
+// Convierte string a minúsculas (para comparar nombres)
+// --------------------------------------------------------------
+static std::string toLower(const std::string& s) {
+    std::string out = s;
+    std::transform(out.begin(), out.end(), out.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    return out;
+}
+
+// --------------------------------------------------------------
+// Imprime una tabla con nombres y valores
+// Complejidad temporal: O(n)
+// --------------------------------------------------------------
 static void printTable(const std::vector<Row>& v, const std::string& metric) {
-    const int W = 24; // ancho fijo para la columna de Nombre (para que se vea alineado)
+    const int W = 24;
     std::cout << "\nNombre" << std::string(std::max(0, W-6),' ') << " | " << metric << "\n";
     std::cout << std::string(W + 3 + (int)metric.size(), '-') << "\n";
-    for (auto& r : v) { // O(n)
-        // si el nombre está larguísimo, lo recorto y le pongo "…"
-        std::string n = r.name.size() > (size_t)W ? r.name.substr(0, W-1)+"…" : r.name;
+
+    for (auto& r : v) {
+        std::string n = r.name.size() > (size_t)W ? r.name.substr(0, W-1) + "…" : r.name;
         std::cout << std::left << std::setw(W) << n << " | " << r.val << "\n";
     }
 }
 
-int main() {
-    std::ios::sync_with_stdio(false); // acelera IO (no mezcla con stdio C)
-    std::cin.tie(nullptr);            // quita flush automático del cout al leer cin
+// --------------------------------------------------------------
+// Guarda un jugador nuevo en el CSV
+// Complejidad: O(1)
+// --------------------------------------------------------------
+static bool guardarJugadorCSV(const std::string& file, const Player& p) {
+    std::ofstream out(file, std::ios::app);
+    if (!out.is_open()) return false;
 
-    // archivo fijo para no andar pidiendo ruta cada vez
-    const std::string FILE = "sample_players_basket.csv";
-
-    std::vector<Player> players; std::string err;
-    // cargar CSV -> O(n) respecto a las filas (parseo simple por línea)
-    if (!loadPlayers(FILE, players, err)) {
-        std::cerr << "Error al leer '" << FILE << "': " << err << "\n";
-        std::cerr << "Pon el CSV en la misma carpeta que el ejecutable o cambia el nombre arriba.\n";
-        return 1; // me salgo si no pude cargar
-    }
-
-    // menucito con números, sin complicaciones
-    std::cout << "=== Basket Stats (QuickSort) ===\n";
-    std::cout << "Elige la métrica a ordenar:\n";
-    std::cout << "  [0] PTS (puntos)\n";
-    std::cout << "  [1] REB (rebotes)\n";
-    std::cout << "  [2] AST (asistencias)\n";
-    std::cout << "  [3] STL (robos)\n";
-    std::cout << "  [4] BLK (bloqueos)\n";
-    std::cout << "Opción: ";
-    int idx=0; std::cin >> idx;
-    if (idx<0 || idx>4) { std::cerr << "Índice inválido.\n"; return 1; }
-
-    std::cout << "Orden:\n";
-    std::cout << "  [1] Ascendente (menor -> mayor)\n";
-    std::cout << "  [2] Descendente (mayor -> menor)\n";
-    std::cout << "Opción: ";
-    int ord=2; std::cin >> ord; bool asc = (ord==1);
-
-    // construir un vector auxiliar solo con (Nombre, ValorElegido) -> O(n)
-    std::vector<Row> view; view.reserve(players.size()); // reservar ayuda un poco
-    const char* names[5] = {"PTS","REB","AST","STL","BLK"};
-    auto metricName = std::string(names[idx]);
-    for (auto& p : players) { // O(n)
-        // saco el valor correspondiente según el índice que eligieron
-        double v = (idx==0? p.PTS : idx==1? p.REB : idx==2? p.AST : idx==3? p.STL : p.BLK);
-        view.push_back({p.name, v}); // push amortizado O(1)
-    }
-
-    // ordenar con mi QuickSort (Lomuto)
-    // Complejidad: promedio O(n log n), peor O(n^2), memoria O(log n) por recursión
-    if (asc)  quickSort(view, [](const Row& a, const Row& b){ return a.val < b.val; });
-    else      quickSort(view, [](const Row& a, const Row& b){ return a.val > b.val; });
-
-    // imprimir tabla -> O(n)
-    printTable(view, metricName);
-    std::cout << "\nListo. 👍\n";
-    return 0; // fin
+    out << p.name << "," << p.PTS << "," << p.REB << "," << p.AST
+        << "," << p.STL << "," << p.BLK << "\n";
+    return true;
 }
 
+// --------------------------------------------------------------
+// Registra un nuevo jugador desde consola
+// Complejidad: O(n) por búsqueda de duplicados
+// --------------------------------------------------------------
+static void registrarJugador(std::vector<Player>& players, const std::string& csvFile) {
+    Player p;
+    std::cout << "\n--- Registro de Jugador ---\n";
+    std::cout << "Nombre: ";
+    std::getline(std::cin >> std::ws, p.name);
 
+    // Verificar duplicados
+    for (const auto& existing : players) {
+        if (toLower(existing.name) == toLower(p.name)) {
+            std::cout << "⚠️ El jugador '" << p.name << "' ya existe. Registro cancelado.\n";
+            return;
+        }
+    }
+
+    std::cout << "PTS: "; std::cin >> p.PTS;
+    std::cout << "REB: "; std::cin >> p.REB;
+    std::cout << "AST: "; std::cin >> p.AST;
+    std::cout << "STL: "; std::cin >> p.STL;
+    std::cout << "BLK: "; std::cin >> p.BLK;
+
+    players.push_back(p);
+
+    if (guardarJugadorCSV(csvFile, p))
+        std::cout << "✅ Jugador registrado y guardado en CSV correctamente.\n";
+    else
+        std::cout << "⚠️ No se pudo guardar el jugador en el archivo.\n";
+}
+
+// --------------------------------------------------------------
+// Menú principal
+// --------------------------------------------------------------
+int main() {
+    std::string csvFile = "sample_players_basket.csv";
+    std::vector<Player> players;
+    std::string err;
+
+    // Cargar CSV
+    if (!loadPlayers(csvFile, players, err)) {
+        std::cout << "⚠️ No se pudieron cargar jugadores: " << err << "\n";
+    }
+
+    int opcion;
+    do {
+        std::cout << "\n========= MENÚ PRINCIPAL =========\n";
+        std::cout << "1. Ordenar por PTS\n";
+        std::cout << "2. Ordenar por REB\n";
+        std::cout << "3. Ordenar por AST\n";
+        std::cout << "4. Ordenar por STL\n";
+        std::cout << "5. Ordenar por BLK\n";
+        std::cout << "6. Registrar nuevo jugador\n";
+        std::cout << "0. Salir\n";
+        std::cout << "=================================\n";
+        std::cout << "Seleccione una opción: ";
+        std::cin >> opcion;
+
+        if (opcion >= 1 && opcion <= 5) {
+            std::vector<Row> data;
+            std::string metric;
+
+            for (auto& p : players) {
+                double val = 0;
+                switch(opcion) {
+                    case 1: val = p.PTS; metric = "PTS"; break;
+                    case 2: val = p.REB; metric = "REB"; break;
+                    case 3: val = p.AST; metric = "AST"; break;
+                    case 4: val = p.STL; metric = "STL"; break;
+                    case 5: val = p.BLK; metric = "BLK"; break;
+                }
+                data.push_back({p.name, val});
+            }
+
+            int orden;
+            std::cout << "1. Ascendente\n2. Descendente\nSeleccione orden: ";
+            std::cin >> orden;
+            bool asc = (orden == 1);
+
+            // QuickSort (Lomuto)
+            // Complejidad temporal:
+            //   Mejor: O(n log n), Promedio: O(n log n), Peor: O(n²)
+            quickSort(data, [asc](const Row& a, const Row& b) {
+                return asc ? a.val < b.val : a.val > b.val;
+            });
+
+            printTable(data, metric);
+
+        } else if (opcion == 6) {
+            registrarJugador(players, csvFile);
+        } else if (opcion != 0) {
+            std::cout << "⚠️ Opción no válida.\n";
+        }
+
+    } while (opcion != 0);
+
+    std::cout << "👋 Programa finalizado.\n";
+    return 0;
+}
