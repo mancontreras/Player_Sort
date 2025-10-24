@@ -41,26 +41,31 @@ Comparación con otros algoritmos de ordenamiento:
 - Merge Sort: O(n log n) promedio y peor caso, pero requiere memoria adicional O(n).
 - Selection Sort: O(n²) en promedio y peor caso; también es simple, pero ineficiente para listas largas.
 
-Complejidad de QuickSort (Lomuto):
+Complejidad de QuickSort :
+- Mejor caso: O(n log n)
 - Promedio: O(n log n)
 - Peor caso: O(n²) (cuando el arreglo ya está ordenado y siempre se elige un pivote desfavorable)
-- Memoria: O(log n) por la pila de llamadas recursivas
 
+Memoria: O(log n) por la pila de llamadas recursivas
 ---
 
 ### SICT0301B: Evalúa los componentes
 **Hace un análisis de complejidad correcto y completo para el programa**
 
-- **Lectura del CSV (`loadPlayers`)**:  
-  Lee n filas y convierte los valores → O(n).
-- **Construcción del vector auxiliar para la métrica**:  
-  Se recorre la lista de jugadores una vez → O(n).
-- **Ordenamiento con QuickSort**:  
-  - Promedio O(n log n)  
-  - Peor O(n²)  
-  - Memoria O(log n)
-- **Impresión de la tabla (`printTable`)**:  
-  Recorre el vector para mostrarlo → O(n).
+Lectura del CSV (loadPlayers):
+Lee n filas y convierte los valores → O(n)
+
+Construcción del vector auxiliar para la métrica:
+Se recorre la lista de jugadores una vez → O(n)
+
+Ordenamiento con QuickSort:
+- Mejor caso: O(n log n)
+- Promedio: O(n log n)
+- Peor caso: O(n²)
+
+Memoria: O(log n)
+Impresión de la tabla (printTable):
+Recorre el vector para mostrarlo → O(n)
 
 En conjunto, el costo total del programa está dominado por el ordenamiento: **O(n log n) en promedio**.
 
