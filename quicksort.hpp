@@ -1,42 +1,73 @@
 #pragma once
-#include <vector>
-#include <utility> // para usar swap()
+#include <functional>  // para std::function
+#include <utility>     // para std::swap
+#include "csv.hpp"     // struct Player
 
-// función para dividir el arreglo con el esquema de Lomuto
-// básicamente deja todos los menores que el pivote a la izq y los mayores a la der
-// Complejidad temporal: O(n) (mejor, promedio y peor caso)
-// Complejidad espacial: O(1)
-template <class T, class Cmp>
-int partition_lomuto(std::vector<T>& a, int l, int r, Cmp cmp) {
-    T pivot = a[r]; // agarro el último como pivote
-    int i = l;      // este va marcando dónde termina la parte "chica"
-    for (int j = l; j < r; ++j) { // recorro de izq a der
-        if (cmp(a[j], pivot)) {   // si este elemento es menor que el pivote
-            std::swap(a[i], a[j]); // lo paso al lado "chico"
-            i++;                  // muevo la frontera
+// --------------------------------------------------------------
+// Nodo de la lista doblemente ligada
+// Contiene un Player y punteros al nodo anterior y siguiente
+// --------------------------------------------------------------
+struct Node {
+    Player data;     // datos del jugador
+    Node* prev = nullptr; // puntero al nodo anterior
+    Node* next = nullptr; // puntero al nodo siguiente
+
+    // Constructor que recibe un Player
+    Node(const Player& p) : data(p), prev(nullptr), next(nullptr) {}
+
+    // Constructor por defecto
+    Node() = default;
+};
+
+// --------------------------------------------------------------
+// Función de partición para QuickSort sobre lista doblemente ligada
+// Entrada: l = inicio de la lista, h = fin de la lista
+//        cmp = función de comparación entre dos Players
+// Salida: puntero al nodo pivote
+// Complejidad: O(n) donde n = número de nodos entre l y h
+// --------------------------------------------------------------
+Node* partitionDLL(Node* l, Node* h, std::function<bool(const Player&, const Player&)> cmp) {
+    Player pivot = h->data; // el pivote es el último nodo
+    Node* i = l->prev;      // i marca el último nodo menor que pivot
+
+    // Recorre todos los nodos desde l hasta h-1
+    for (Node* j = l; j != h; j = j->next) {
+        // Si j es menor que el pivote según cmp
+        if (cmp(j->data, pivot)) {
+            // Avanza i o inicialízalo si es nullptr
+            i = (i == nullptr) ? l : i->next;
+            // Intercambia los datos de i y j
+            std::swap(i->data, j->data);
         }
     }
-    std::swap(a[i], a[r]); // pongo el pivote en medio (en su lugar correcto)
-    return i;              // regreso la posición del pivote
+
+    // Coloca el pivote en su posición final
+    i = (i == nullptr) ? l : i->next;
+    std::swap(i->data, h->data);
+
+    return i; // retorna nodo pivote
 }
 
-// implementación del QuickSort usando recursión
-// Complejidad temporal:
-//  - Mejor caso: O(n log n)
-//  - Promedio:   O(n log n)
-//  - Peor caso:  O(n^2)
-// Complejidad espacial: O(log n) por la pila de recursión
-template <class T, class Cmp>
-void quickSort(std::vector<T>& a, int l, int r, Cmp cmp) {
-    if (l >= r) return;                        // caso base, nada que ordenar
-    int p = partition_lomuto(a, l, r, cmp);    // divido el arreglo
-    quickSort(a, l, p - 1, cmp);               // ordeno la parte izq
-    quickSort(a, p + 1, r, cmp);               // ordeno la parte der
-}
+// --------------------------------------------------------------
+// QuickSort recursivo para lista doblemente ligada
+// Entrada: l = inicio de la lista, h = fin de la lista
+//        cmp = función de comparación entre dos Players
+// Complejidad:
+//   Mejor caso: O(n log n) (cuando el pivote divide la lista de manera equilibrada)
+//   Promedio:   O(n log n)
+//   Peor caso:  O(n²) (cuando siempre se elige un pivote desfavorable, lista ya ordenada o casi ordenada)
+// Memoria: O(log n) por la pila de llamadas recursivas
+// --------------------------------------------------------------
+void quickSortDLL(Node* l, Node* h, std::function<bool(const Player&, const Player&)> cmp) {
+    // Solo ordena si hay al menos 2 nodos
+    if (h != nullptr && l != h && l != h->next) {
+        // Particiona la lista y obtiene el pivote
+        Node* p = partitionDLL(l, h, cmp);
 
-// versión cortita para llamar sin pasar índices
-// nomás le dices el vector y ya
-template <class T, class Cmp>
-void quickSort(std::vector<T>& a, Cmp cmp) {
-    if (!a.empty()) quickSort(a, 0, (int)a.size() - 1, cmp);
+        // Ordena recursivamente la sublista izquierda
+        quickSortDLL(l, p->prev, cmp);
+
+        // Ordena recursivamente la sublista derecha
+        quickSortDLL(p->next, h, cmp);
+    }
 }
