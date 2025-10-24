@@ -30,13 +30,21 @@ El programa imprime la tabla con `Nombre | Estadística` ya ordenada.
 
 ### SICT0302B: Toma decisiones
 **Selecciona y usa un algoritmo de ordenamiento adecuado al problema**  
-Para este proyecto uso **QuickSort con partición de Lomuto**, porque es un algoritmo clásico, relativamente sencillo de implementar y en promedio trabaja en O(n log n), lo que es eficiente para ordenar listas de jugadores.  
-Las funciones donde se ve esto son `partition_lomuto` y `quickSort` que están en el archivo `quicksort.hpp`.
+Para este proyecto se usa QuickSort con partición de Lomuto, porque:
+Es un algoritmo clásico y relativamente sencillo de implementar.
+En promedio, tiene complejidad O(n log n), eficiente para ordenar listas de jugadores de tamaño moderado.
+Permite ordenar en ambos sentidos (ascendente/descendente) fácilmente usando una función de comparación.
+Las funciones donde se observa esto son partition_lomuto y quickSort, que se encuentran en el archivo quicksort.hpp.
 
-- Complejidad QuickSort:
-  - Promedio: O(n log n)
-  - Peor caso: O(n²) (cuando el arreglo ya está ordenado y siempre se elige un pivote malo)
-  - Memoria: O(log n) por las llamadas recursivas
+Comparación con otros algoritmos de ordenamiento:
+- Bubble Sort / Insertion Sort: O(n²) en promedio, mucho más lento para listas medianas o grandes.
+- Merge Sort: O(n log n) promedio y peor caso, pero requiere memoria adicional O(n).
+- Selection Sort: O(n²) en promedio y peor caso; también es simple, pero ineficiente para listas largas.
+
+Complejidad de QuickSort (Lomuto):
+- Promedio: O(n log n)
+- Peor caso: O(n²) (cuando el arreglo ya está ordenado y siempre se elige un pivote desfavorable)
+- Memoria: O(log n) por la pila de llamadas recursivas
 
 ---
 
