@@ -1,81 +1,98 @@
-# Proyecto Player_Sort - Avance 3 (Final)
+# Proyecto Player_Sort - Avance 3 
 **Autor:** Manuel Eduardo Contreras Flores (A01707142)
 
 ## Descripción
-Este proyecto es una aplicación en C++ para administrar, analizar y ordenar estadísticas de jugadores de baloncesto. El sistema permite cargar datos desde un archivo CSV, limpiar la información, visualizarla, buscar jugadores específicos, registrar nuevos datos y exportar reportes ordenados.
+Este proyecto carga un archivo tipo tabla (CSV) con nombres de jugadores y sus estadísticas (PTS, REB, AST, STL, BLK). El programa permite elegir una estadística y mostrar a todos los jugadores ordenados de manera ascendente o descendente según ese valor.
 
-Ejemplo de archivo base: `sample_players_basket.csv`
+Ejemplo:  
+Archivo CSV: `sample_players_basket.csv`
 
-## Funcionamiento del Programa
+## Funcionamiento actualizado:
 
-### 1. Carga y Limpieza
-Al iniciar, el programa lee el archivo CSV automáticamente. Se utiliza un parser robusto que limpia caracteres basura (como BOM o espacios) y estandariza formatos numéricos.
+### Paso 1: 
+El programa lee automáticamente el archivo CSV y carga los jugadores en memoria.
 
-### 2. Menú Interactivo
-El usuario cuenta con las siguientes opciones:
-- **[1-5] Ordenar:** Clasifica a los jugadores por PTS, REB, AST, STL o BLK (Ascendente/Descendente).
-- **[6] Registrar:** Agrega un jugador validando duplicados (se guarda en el CSV original).
-- **[7] Buscar:** Localiza jugadores por nombre (búsqueda parcial).
-- **[8] Exportar:** Guarda la lista tal cual está ordenada en ese momento en un **nuevo archivo CSV**.
-- **[0] Salir**
+### Paso 2: 
+El usuario selecciona la opción del menú:
+   - [1-5] Ordenar por PTS, REB, AST, STL, BLK.
+   - [6] Registrar un nuevo jugador.
+   - [7] **Buscar un jugador** (Nueva función).
+   - [8] **Exportar lista actual a CSV** (Nueva función).
+   - [0] Salir del programa.
+
+### Paso 3 (Ordenamiento):
+El programa ordena los jugadores usando **QuickSort sobre una lista doblemente ligada** y luego imprime la tabla ordenada.
 
 ---
 
 ### SICT0302B: Toma decisiones
 **Selecciona y usa una estructura de datos adecuada al problema**
+En este avance se optó por una **lista doblemente ligada (DLL)** para el proceso de ordenamiento porque:
+- Permite recorrer los elementos en ambas direcciones (`prev` y `next`), lo cual facilita la lógica de partición en QuickSort sin necesidad de índices numéricos.
+- **Eficiencia en memoria:** Al ordenar, el intercambio de nodos se logra ajustando punteros. Esto evita el movimiento masivo de datos que ocurriría en un vector al insertar o mover elementos en posiciones intermedias.
 
-Se optó por una **arquitectura híbrida** para aprovechar las fortalezas de dos estructuras:
-
-1.  **std::vector (Almacenamiento Principal):**
-    * Se usa para mantener la base de datos en memoria, realizar búsquedas y gestionar la escritura en archivos. Su acceso aleatorio permite iteraciones rápidas para la exportación.
-
-2.  **Lista Doblemente Ligada (DLL) (Módulo de Ordenamiento):**
-    * Para ordenar, los datos se convierten temporalmente a una DLL.
-    * *Justificación:* El algoritmo **QuickSort** requiere múltiples intercambios (`swaps`). En una lista ligada, intercambiar elementos es una operación de punteros ($O(1)$) sin necesidad de desplazar bloques de memoria como en un vector.
-    * *Gestión de Memoria:* Se implementó una función de limpieza (`deleteDLL`) que libera la memoria dinámica inmediatamente después de ordenar para evitar fugas (*memory leaks*).
+**Comparación de complejidad (Algoritmos y Estructuras):**
+- **Vectores + QuickSort:** O(n log n) promedio. Sin embargo, si se requiriera insertar en medio, sería costoso O(n).
+- **Lista doblemente ligada + QuickSort:** O(n log n) promedio. La inserción y borrado es O(1) si se tiene la referencia al nodo, o O(n) si se busca, pero nunca cuadrática.
+- **Selection/Insertion sort:** O(n²), se descartaron por ser ineficientes para listas que pueden crecer.
+- **Merge Sort:** O(n log n) estable, pero requiere memoria auxiliar O(n). QuickSort se realiza *in-place* sobre la lista.
 
 ---
 
 ### SICT0301B: Evalúa los componentes
-**Hace un análisis de complejidad correcto y completo del programa final**
+**Hace un análisis de complejidad correcto y completo del programa:**
 
-A continuación se detalla el análisis asintótico (Big O) de todas las funcionalidades implementadas:
+A continuación se desglosa la complejidad temporal (Big O) para cada funcionalidad, detallando explícitamente los tres escenarios:
 
-#### 1. Carga de datos (`loadPlayers`)
-Lectura secuencial y limpieza de cadenas.
-* **Complejidad:** $O(n)$ (Lineal con respecto al número de filas).
+**1. Carga y Construcción (`loadPlayers` + `buildDLL`):**
+Se leen $n$ registros y se agregan a la lista usando un puntero `tail`.
+- **Mejor caso:** O(n)
+- **Caso promedio:** O(n)
+- **Peor caso:** O(n)
+- *Análisis:* La lectura es lineal y la inserción al final con `tail` es O(1) por elemento, resultando en O(n) total.
 
-#### 2. Ordenamiento (`quickSortDLL`)
-Algoritmo QuickSort optimizado para listas dobles.
-* **Mejor caso / Promedio:** $O(n \log n)$.
-* **Peor caso:** $O(n^2)$ (Si la lista ya está ordenada o existen muchos valores duplicados y el pivote es extremo).
-* *Nota:* La conversión entre Vector y DLL es $O(n)$, lo cual no afecta la complejidad dominante del ordenamiento.
+**2. Ordenamiento (QuickSort sobre DLL):**
+Depende del pivote y el orden inicial de los datos.
+- **Mejor caso:** O(n log n) (Particiones balanceadas).
+- **Caso promedio:** O(n log n) (Datos aleatorios).
+- **Peor caso:** O(n²) (Lista ya ordenada o inversamente ordenada).
+- **Memoria:** O(log n) por la pila de recursión.
 
-#### 3. Búsqueda (`buscarJugador`)
-Búsqueda lineal por coincidencia de texto (*substring*).
-* **Mejor caso:** $O(1)$ (El jugador está al inicio).
-* **Peor caso:** $O(n)$ (No encontrado o está al final de la lista).
+**3. Registro de nuevo jugador (`registrarJugador`):**
+Implica buscar si el nombre existe (recorrido lineal) y luego insertar.
+- **Mejor caso:** O(1) (El duplicado se detecta en el primer nodo).
+- **Caso promedio:** O(n) (Se recorre la mitad de la lista).
+- **Peor caso:** O(n) (No hay duplicados; se recorre toda la lista y se inserta al final).
 
-#### 4. Exportación / Escritura (`saveAllPlayers`)
-Recorrido lineal del vector para escribir en disco un nuevo archivo.
-* **Complejidad:** $O(n)$.
+**4. Búsqueda de jugador (`buscarJugador`) [NUEVO]:**
+Búsqueda lineal por coincidencia de texto en el vector.
+- **Mejor caso:** O(1) (Encontrado al inicio).
+- **Caso promedio:** O(n) (Encontrado a la mitad o no existe).
+- **Peor caso:** O(n) (No encontrado o está al final).
 
-#### 5. Registro (`registrarJugador`)
-Verificación de duplicados (recorrido) + Inserción al final.
-* **Complejidad:** $O(n)$ (Debido a la verificación de existencia antes de insertar).
+**5. Exportación de archivo (`saveAllPlayers`) [NUEVO]:**
+Recorre la estructura completa para escribirla en un nuevo CSV.
+- **Mejor caso:** O(n)
+- **Caso promedio:** O(n)
+- **Peor caso:** O(n)
+
+**6. Visualización (`printTable`):**
+Recorrido lineal para imprimir en consola.
+- **Mejor caso:** O(n)
+- **Caso promedio:** O(n)
+- **Peor caso:** O(n)
 
 **Conclusión:**
-La complejidad general del programa en el caso promedio es **$O(n \log n)$**, dominada por el proceso de ordenamiento.
+El costo total del programa está dominado por el ordenamiento: **O(n log n) en promedio**.
 
 ---
 
 ### SICT0303B: Implementa acciones científicas
-**Implementa mecanismos de lectura y escritura de archivos para guardar los datos correctamente**
+**Implementa mecanismos de lectura y escritura de archivos para guardar los datos de manera correcta:**
 
 1.  **Lectura Robusta:**
-    Se desarrolló la función `splitCSV` y `clean` capaz de procesar archivos con formato irregular (espacios extra, comillas) y estandarizar los valores numéricos (cambio de comas por puntos) para asegurar una lectura correcta de las estadísticas.
+    Se implementó un mecanismo de limpieza (`clean` y `splitCSV`) que elimina caracteres basura y espacios invisibles del CSV, y estandariza los valores numéricos (reemplazando comas por puntos) para asegurar una lectura correcta de las estadísticas.
 
 2.  **Escritura (Persistencia y Reportes):**
-    El programa implementa dos estrategias de escritura:
-    * **Persistencia (Append):** Al registrar un jugador (Opción 6), se utiliza el modo `std::ios::app`. Esto permite agregar datos al final del archivo original de manera eficiente sin reescribir todo el historial.
-    * **Exportación (Sobreescritura):** La función `saveAllPlayers` (Opción 8) permite generar **nuevos archivos CSV** con los datos ya ordenados. Recorre la estructura ordenada en memoria y la escribe secuencialmente en disco, permitiendo al usuario guardar sus análisis (ej. "top_anotadores.csv").
+    - **Modo Append:** Para el registro (Opción 6), se usa `std::ios::app` para añadir datos al final del archivo original de manera eficiente sin borrar el historial.
+    - **Modo Write (Exportación):** Para la opción 8, se usa `std::ofstream` para crear un archivo nuevo (ej. `reporte.csv`) con los datos ya ordenados y limpios, permitiendo extraer la información procesada correctamente.
